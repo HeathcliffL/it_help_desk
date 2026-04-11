@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Campus IT Help Desk</h1>
+<p>A prototype multi-user web application for submitting and managing campus IT support tickets.</p>
+<p><a href="{{ url_for('auth.login') }}">Login</a> or <a href="{{ url_for('auth.register') }}">create an account</a> to get started.</p>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Admin Panel</h1>
+<p>Review and manage all submitted tickets.</p>
+
+{% if tickets %}
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Owner</th>
+    <th>Title</th>
+    <th>Category</th>
+    <th>Priority</th>
+    <th>Status</th>
+    <th>Action</th>
+  </tr>
+  {% for ticket in tickets %}
+  <tr>
+    <td>{{ ticket.id }}</td>
+    <td>{{ ticket.owner.username }}</td>
+    <td>{{ ticket.title }}</td>
+    <td>{{ ticket.category }}</td>
+    <td>{{ ticket.priority }}</td>
+    <td><span class="badge">{{ ticket.status }}</span></td>
+    <td><a href="{{ url_for('main.ticket_detail', ticket_id=ticket.id) }}">View</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+  <p>No tickets available.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,85 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #eef2f6;
+  color: #1b1b1b;
+}
+
+nav {
+  background: #17324d;
+  color: white;
+  padding: 14px 24px;
+}
+
+nav a {
+  color: white;
+  margin-right: 14px;
+  text-decoration: none;
+}
+
+.nav-status {
+  margin-right: 14px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 24px auto;
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+input, select, textarea, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+button {
+  background: #17324d;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #234a70;
+}
+
+.flash {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.success { background: #e7f7ed; }
+.warning { background: #fff5db; }
+.danger { background: #fdeaea; }
+.muted { color: #666; }
+.badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  display: inline-block;
+}
+.card-like {
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
+  padding: 12px;
+  border-radius: 8px;
+}
