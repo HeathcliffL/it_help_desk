@@ -19,7 +19,7 @@
 2. "Show a secure example of session-based login with password hashing in Flask."
 3. "Add a ticket comment system with server-side ownership checks and an admin reply flow."
 
-## Example AI Output Review / Fixes
+## AI Output Review / Fixes
 ### 1. Session and route protection
 An AI-generated draft handled role differences mostly in the UI. This was revised to enforce authorization server-side with explicit decorators and ownership checks.
 
