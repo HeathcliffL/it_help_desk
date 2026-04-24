@@ -1,15 +1,29 @@
 # Campus IT Help Desk
 
-Campus IT Help Desk is a small multi-user web application for reporting and managing campus IT support issues. Regular users can create tickets and track their status. Administrators can review all tickets and update ticket statuses through server-side role checks.
+Campus IT Help Desk is a multi-user web application for reporting and managing campus IT support issues. Regular users can create tickets, track ticket status, and post follow-up comments. Administrators can review all tickets, respond to users, and update ticket statuses through server-side role-based access control.
+
+## Submission-Oriented Summary
+This project is intentionally scoped for a security analysis handoff. It is small enough to understand in one sitting, but complete enough to provide realistic attack surface in the areas of authentication, authorization, form input handling, route protection, and persistent data storage.
 
 ## Core Features
 - User registration and login
 - Role-based access control with `user` and `admin`
 - Ticket creation with server-side validation
+- Ticket detail page with comment / reply thread
+- Reopen resolved tickets with a short reason
 - User dashboard limited to owned tickets
-- Ticket detail view
-- Admin panel for reviewing all tickets
-- Persistent storage with PostgreSQL
+- Admin panel for all tickets, with status filtering
+- Intentionally weak area for analysis: no rate limiting and minimal validation on the reopen form
+- PostgreSQL-backed persistent storage
+- CLI commands for database setup and demo data seeding
+
+## Technology Stack
+- Backend: Flask
+- Database: PostgreSQL
+- ORM: Flask-SQLAlchemy / SQLAlchemy
+- Authentication: Session-based login
+- Password Storage: Werkzeug password hashing
+- Frontend: Jinja templates + plain CSS
 
 ## Project Structure
 ```text
@@ -40,49 +54,163 @@ campus_it_help_desk/
 └── run.py
 ```
 
+## Data Model
+### `users`
+Stores account information and role assignment.
+- `id`
+- `username`
+- `email`
+- `password_hash`
+- `role`
+- `created_at`
+
+### `tickets`
+Stores help desk requests submitted by users.
+- `id`
+- `title`
+- `category`
+- `priority`
+- `description`
+- `status`
+- `user_id`
+- `created_at`
+- `updated_at`
+
+### `ticket_comments`
+Stores replies between users and administrators on each ticket.
+- `id`
+- `ticket_id`
+- `user_id`
+- `content`
+- `created_at`
+
 ## User Roles
 ### User
 - Register and log in
 - Create tickets
 - View only their own tickets
+- Add comments to their own tickets
+- Reopen their own resolved tickets with a reason
 
 ### Admin
-- Log in through the default admin account
+- Log in through the default seeded admin account
 - View all tickets
 - Update ticket status
+- Add comments / replies to any ticket
+- Filter ticket list by status
+- Reopen any resolved ticket during support follow-up
 
-## Workflows
-1. User registers, logs in, submits a ticket, and views it on the dashboard.
-2. Admin logs in, reviews tickets, opens a ticket, and updates its status.
+## Required Forms
+1. **Registration form**: stores username, email, and password hash.
+2. **Login form**: validates user credentials and starts a session.
+3. **Ticket submission form**: stores title, category, priority, and description.
+4. **Comment form**: stores ticket replies linked to both ticket and user.
+5. **Reopen form**: stores a reopen reason as a ticket comment and changes a resolved ticket back to `Open`.
 
-## Setup
-### 1. Create and activate a virtual environment
+## Distinct Views / Pages
+- Landing page
+- Login page
+- Register page
+- User dashboard
+- Submit ticket page
+- Ticket detail page
+- Admin panel
+
+## End-to-End Workflows
+### Workflow 1: User submits a support ticket
+1. A new user registers an account.
+2. The user logs in.
+3. The user opens the ticket submission page.
+4. The user submits a ticket with category, priority, and description.
+5. The application validates the input and writes the ticket to PostgreSQL.
+6. The user is redirected to the ticket detail page and later sees the ticket on the dashboard.
+
+### Workflow 2: Admin reviews and updates a ticket
+1. An admin logs in.
+2. The admin opens the admin panel and reviews submitted tickets.
+3. The admin opens a ticket detail page.
+4. The admin updates the ticket status or posts a reply.
+5. The application writes the update to PostgreSQL.
+6. The user later logs in and sees the updated status and comment thread.
+
+### Workflow 3: User reopens a resolved ticket
+1. A user logs in and opens a resolved ticket they own.
+2. The user enters a reason in the reopen form.
+3. The server confirms the user owns the ticket or is an admin.
+4. The application changes the ticket status back to `Open`.
+5. The reopen reason is stored as a ticket comment.
+6. The updated ticket appears on the dashboard for continued follow-up.
+
+## Security-Relevant Design Points
+This project intentionally includes features that can be analyzed by another team:
+- Session-based authentication
+- Role-restricted routes
+- Server-side authorization checks for ticket ownership
+- Form input validation
+- Persistent relational data storage
+- Multi-step user / admin interaction flows
+
+## Intentionally Simplified or Weak Area
+This project deliberately keeps one area thin for Phase 1 security analysis: the reopen-ticket form only validates that the reason field is not empty. It does not enforce a maximum reason length, duplicate-reopen protection, throttling, or rate limiting. Login and comment submission also do not include rate limiting. Access control for reopening is still enforced server-side, but the validation and abuse-prevention logic is intentionally minimal so another team has a realistic weakness to inspect.
+
+## Setup Instructions
+### 1. Install PostgreSQL on the host system
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+### 2. Create the database
+```bash
+sudo -u postgres psql
+```
+Then run:
+```sql
+ALTER USER postgres WITH PASSWORD 'postgres';
+CREATE DATABASE campus_helpdesk;
+\q
+```
+
+### 3. Create and activate a virtual environment
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 2. Install dependencies
+### 4. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Set environment variables
+### 5. Set environment variables
 ```bash
 export SECRET_KEY="replace-this-secret"
 export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/campus_helpdesk"
 ```
 
-### 4. Initialize the database and create the default admin
+### 6. Initialize the database and create the default admin
 ```bash
 flask --app run.py init-db
 ```
 
-### 5. Start the application
+### 7. Optional: seed demo data
+```bash
+flask --app run.py seed-demo
+```
+
+### 8. Start the application
 ```bash
 python3 run.py
 ```
 
-## Default Admin Account
+## Demo Accounts
+### Default admin
 - Email: `admin@campus.local`
 - Password: `Admin123!`
+
+### Seeded demo user
+Available after running `flask --app run.py seed-demo`:
+- Email: `alice@student.local`
+- Password: `Student123!`

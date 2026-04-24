@@ -14,6 +14,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     tickets = db.relationship("Ticket", backref="owner", lazy=True, cascade="all, delete-orphan")
+    comments = db.relationship("TicketComment", backref="author", lazy=True, cascade="all, delete-orphan")
 
 
 class Ticket(db.Model):
@@ -28,3 +29,21 @@ class Ticket(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    comments = db.relationship(
+        "TicketComment",
+        backref="ticket",
+        lazy=True,
+        cascade="all, delete-orphan",
+        order_by="TicketComment.created_at.asc()",
+    )
+
+
+class TicketComment(db.Model):
+    __tablename__ = "ticket_comments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey("tickets.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

@@ -83,3 +83,17 @@ button:hover {
   padding: 12px;
   border-radius: 8px;
 }
+.comment-box {
+  border: 1px solid #d8dee7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.inline-form {
+  display: grid;
+  grid-template-columns: 180px 1fr 180px;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}

@@ -16,8 +16,17 @@ def inject_user():
 @admin_bp.route("")
 @role_required("admin")
 def admin_panel():
-    tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
-    return render_template("admin_panel.html", tickets=tickets)
+    status_filter = request.args.get("status", "").strip()
+    query = Ticket.query.order_by(Ticket.created_at.desc())
+    if status_filter in VALID_STATUSES:
+        query = query.filter_by(status=status_filter)
+    tickets = query.all()
+    return render_template(
+        "admin_panel.html",
+        tickets=tickets,
+        statuses=sorted(VALID_STATUSES),
+        selected_status=status_filter,
+    )
 
 
 @admin_bp.route("/tickets/<int:ticket_id>/status", methods=["POST"])

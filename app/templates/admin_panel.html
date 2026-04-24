@@ -3,6 +3,17 @@
 <h1>Admin Panel</h1>
 <p>Review and manage all submitted tickets.</p>
 
+<form method="get" class="inline-form">
+  <label for="status">Filter by status</label>
+  <select id="status" name="status">
+    <option value="">All</option>
+    {% for status in statuses %}
+      <option value="{{ status }}" {% if selected_status == status %}selected{% endif %}>{{ status }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Apply Filter</button>
+</form>
+
 {% if tickets %}
 <table>
   <tr>
@@ -12,6 +23,7 @@
     <th>Category</th>
     <th>Priority</th>
     <th>Status</th>
+    <th>Comments</th>
     <th>Action</th>
   </tr>
   {% for ticket in tickets %}
@@ -22,6 +34,7 @@
     <td>{{ ticket.category }}</td>
     <td>{{ ticket.priority }}</td>
     <td><span class="badge">{{ ticket.status }}</span></td>
+    <td>{{ ticket.comments|length }}</td>
     <td><a href="{{ url_for('main.ticket_detail', ticket_id=ticket.id) }}">View</a></td>
   </tr>
   {% endfor %}

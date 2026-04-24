@@ -24,4 +24,36 @@
   <button type="submit">Update Status</button>
 </form>
 {% endif %}
+
+{% if ticket.status == 'Resolved' %}
+<hr>
+<h2>Reopen Ticket</h2>
+<p class="muted">Use this if the issue came back or the original resolution did not work.</p>
+<form method="post" action="{{ url_for('main.reopen_ticket', ticket_id=ticket.id) }}">
+  <label for="reason">Reason for reopening</label>
+  <textarea id="reason" name="reason" rows="3" required></textarea>
+  <button type="submit">Reopen Ticket</button>
+</form>
+{% endif %}
+
+<hr>
+<h2>Comments / Replies</h2>
+{% if ticket.comments %}
+  {% for comment in ticket.comments %}
+    <div class="comment-box">
+      <p><strong>{{ comment.author.username }}</strong> ({{ comment.author.role }})</p>
+      <p class="muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+      <p>{{ comment.content }}</p>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No comments yet.</p>
+{% endif %}
+
+<h3>Add Comment</h3>
+<form method="post" action="{{ url_for('main.add_comment', ticket_id=ticket.id) }}">
+  <label for="content">Comment</label>
+  <textarea id="content" name="content" rows="4" required></textarea>
+  <button type="submit">Post Comment</button>
+</form>
 {% endblock %}
