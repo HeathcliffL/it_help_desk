@@ -150,9 +150,6 @@ This project intentionally includes features that can be analyzed by another tea
 - Persistent relational data storage
 - Multi-step user / admin interaction flows
 
-## Intentionally Simplified or Weak Area
-This project deliberately keeps one area thin for Phase 1 security analysis: the reopen-ticket form only validates that the reason field is not empty. It does not enforce a maximum reason length, duplicate-reopen protection, throttling, or rate limiting. Login and comment submission also do not include rate limiting. Access control for reopening is still enforced server-side, but the validation and abuse-prevention logic is intentionally minimal so another team has a realistic weakness to inspect.
-
 ## Setup Instructions
 ### 1. Install PostgreSQL on the host system
 ```bash
