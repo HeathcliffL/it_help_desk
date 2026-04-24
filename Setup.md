@@ -1,175 +1,87 @@
 # Setup.md
 
-This guide explains how to install and run the Campus IT Help Desk project from a clean Ubuntu environment.
+How to install and run the Campus IT Help Desk project.
+
+By default the app uses SQLite — no external database is required. The database file (`helpdesk.db`) is created automatically in the project root on first run.
 
 ## Prerequisites
 
-- Ubuntu Linux
-- Python 3
-- Python virtual environment support
-- PostgreSQL
-- Git or another way to download/extract the project files
+- Python 3.11+ (older 3.x will likely work but is untested)
+- macOS, Linux, or Windows
 
-## 1. Install system packages
+That's it. No PostgreSQL, no system services to start.
 
+## Option A — macOS double-click
+
+1. Open the project folder in Finder.
+2. Double-click `HelpDesk.app` (or `launch.command`).
+
+On the first run, Terminal will open and the launcher will:
+- create a virtualenv under `venv/`,
+- install dependencies from `requirements.txt`,
+- run `flask init-db` to create `helpdesk.db` and the default admin,
+- start the Flask server and open `http://127.0.0.1:5000` in your browser.
+
+If double-click does nothing the first time, it's almost always macOS quarantine. Open Terminal and run once:
 ```bash
-sudo apt update
-sudo apt install -y python3 python3-venv python3-pip postgresql postgresql-contrib
+cd "$HOME/Desktop/it_help_desk" && chmod +x launch.command && xattr -cr launch.command 2>/dev/null; open launch.command
 ```
 
-Start PostgreSQL:
+## Option B — manual (any OS)
 
-```bash
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-sudo systemctl status postgresql
-```
-
-The service should show `active (running)`.
-
-## 2. Create the PostgreSQL database
-
-Open the PostgreSQL shell:
-
-```bash
-sudo -u postgres psql
-```
-
-Run the following commands:
-
-```sql
-ALTER USER postgres WITH PASSWORD 'postgres';
-DROP DATABASE IF EXISTS campus_helpdesk;
-CREATE DATABASE campus_helpdesk;
-\q
-```
-
-The `DROP DATABASE` command is useful for a clean local test. Do not use it if you want to preserve existing local test data.
-
-## 3. Create and activate a Python virtual environment
-
-From the project root directory:
+From the project root:
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate
-```
-
-Upgrade pip and install dependencies:
-
-```bash
-pip install --upgrade pip
+source venv/bin/activate        # (Windows: venv\Scripts\activate)
 pip install -r requirements.txt
-```
-
-## 4. Configure environment variables
-
-For local testing, run:
-
-```bash
-export SECRET_KEY="local-test-secret"
-export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/campus_helpdesk"
-```
-
-Optional: copy `.env.example` and use it as a reference for your local environment settings.
-
-## 5. Initialize the database
-
-```bash
 flask --app run.py init-db
+python3 run.py
 ```
 
-This creates the database tables and the default admin account.
+Then open `http://127.0.0.1:5000` in a browser.
 
-## 6. Optional: seed demo data
-
+### Optional: seed demo data
 ```bash
 flask --app run.py seed-demo
 ```
 
-This creates a demo user and sample tickets for testing.
+## Environment variables
 
-## 7. Run the application
+Everything is optional. If you want to customize, copy `.env.example` to `.env` and edit.
 
-```bash
-python3 run.py
-```
+- `SECRET_KEY` — Flask session secret. Defaults to a placeholder.
+- `DATABASE_URL` — Override the database. Default is `sqlite:///helpdesk.db` in the project root. Set to a Postgres URL (e.g. `postgresql://user:pass@localhost:5432/dbname`) to use Postgres instead — you'll also need `pip install psycopg2-binary`.
 
-Open the application in a browser:
-
-```text
-http://127.0.0.1:5000
-```
-
-## Demo Accounts
+## Demo accounts
 
 ### Default admin
-
 - Email: `admin@campus.local`
 - Password: `Admin123!`
 
 ### Seeded demo user
-
-Available after running `flask --app run.py seed-demo`:
-
+Available after `flask --app run.py seed-demo`:
 - Email: `alice@student.local`
 - Password: `Student123!`
 
-## Basic Workflow Test
+## Basic workflow test
 
 1. Register a new user.
 2. Log in as that user.
 3. Submit a support ticket.
-4. Log out.
-5. Log in as admin.
-6. Open the admin panel.
-7. Add a comment and update the ticket status to `Resolved`.
-8. Log out.
-9. Log back in as the user.
-10. Open the resolved ticket and submit a reopen reason.
-11. Confirm the ticket status changes back to `Open` and the reopen reason appears as a comment.
+4. Log out, log in as admin.
+5. Open the admin panel, add a comment, set the ticket to `Resolved`.
+6. Log out, log back in as the user.
+7. Open the resolved ticket and submit a reopen reason.
+8. Confirm the ticket status changes back to `Open`.
 
 ## Troubleshooting
 
-### PostgreSQL connection failed
+### "flask: command not found"
+Activate the virtualenv first: `source venv/bin/activate`.
 
-```bash
-sudo systemctl restart postgresql
-```
+### Reset the local database
+Delete `helpdesk.db` in the project root, then re-run `flask --app run.py init-db`.
 
-Then confirm `DATABASE_URL` is set correctly:
-
-```bash
-echo $DATABASE_URL
-```
-
-### Flask command not found
-
-Activate the virtual environment:
-
-```bash
-source venv/bin/activate
-```
-
-Then retry the command.
-
-### Database already exists or contains old data
-
-Reset the database manually:
-
-```bash
-sudo -u postgres psql
-```
-
-```sql
-DROP DATABASE IF EXISTS campus_helpdesk;
-CREATE DATABASE campus_helpdesk;
-\q
-```
-
-Then rerun:
-
-```bash
-flask --app run.py init-db
-flask --app run.py seed-demo
-```
+### Port 5000 already in use
+Another process is listening on 5000. Kill it, or edit `run.py` to change the port.

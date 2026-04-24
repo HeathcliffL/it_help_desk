@@ -1,0 +1,27 @@
+# Local environment (may contain real credentials; do not commit)
+.env
+
+# SQLite database files (local data, do not commit)
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.Python
+
+# Launcher state
+.icon_set
+
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,29 @@
+#!/bin/bash
+# HelpDesk.app/Contents/MacOS/HelpDesk
+#
+# Entry point for the HelpDesk.app bundle.
+# Locates launch.command in the parent project folder and opens it in Terminal.
+
+set -u
+
+# The .app lives inside the project folder, so go up 3 levels from MacOS/.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$HERE/../../.." && pwd)"
+LAUNCHER="$PROJECT_DIR/launch.command"
+
+if [ ! -f "$LAUNCHER" ]; then
+    osascript -e "display dialog \"launch.command not found.
+
+Expected at:
+$LAUNCHER
+
+Make sure HelpDesk.app lives in the project root alongside launch.command.\" buttons {\"OK\"} default button 1 with icon stop with title \"Campus IT Help Desk\""
+    exit 1
+fi
+
+# Make sure the launcher can run on a fresh clone.
+chmod +x "$LAUNCHER" 2>/dev/null || true
+xattr -cr "$LAUNCHER" 2>/dev/null || true
+
+# Open Terminal and run the launcher there so the user sees the output.
+open -a Terminal "$LAUNCHER"

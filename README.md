@@ -14,12 +14,12 @@ This project is intentionally scoped for a security analysis handoff. It is smal
 - User dashboard limited to owned tickets
 - Admin panel for all tickets, with status filtering
 - Intentionally weak area for analysis: no rate limiting and minimal validation on the reopen form
-- PostgreSQL-backed persistent storage
+- SQLite-backed persistent storage by default (Postgres supported via `DATABASE_URL`)
 - CLI commands for database setup and demo data seeding
 
 ## Technology Stack
 - Backend: Flask
-- Database: PostgreSQL
+- Database: SQLite by default (file-based, zero external deps). PostgreSQL optional via `DATABASE_URL`.
 - ORM: Flask-SQLAlchemy / SQLAlchemy
 - Authentication: Session-based login
 - Password Storage: Werkzeug password hashing
@@ -151,56 +151,44 @@ This project intentionally includes features that can be analyzed by another tea
 - Multi-step user / admin interaction flows
 
 ## Setup Instructions
-### 1. Install PostgreSQL on the host system
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-```
 
-### 2. Create the database
-```bash
-sudo -u postgres psql
-```
-Then run:
-```sql
-ALTER USER postgres WITH PASSWORD 'postgres';
-CREATE DATABASE campus_helpdesk;
-\q
-```
+### Quickest path (macOS)
+Double-click `HelpDesk.app` (or `launch.command`) in the project folder. It creates the virtualenv, installs dependencies, initializes the SQLite database, and opens the app in your browser.
 
-### 3. Create and activate a virtual environment
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+### Manual setup (any OS)
 
-### 4. Install dependencies
-```bash
-pip install -r requirements.txt
-```
+1. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Initialize the database and create the default admin:
+   ```bash
+   flask --app run.py init-db
+   ```
+4. Optional: seed demo data:
+   ```bash
+   flask --app run.py seed-demo
+   ```
+5. Start the application:
+   ```bash
+   python3 run.py
+   ```
 
-### 5. Set environment variables
+### Using PostgreSQL instead of SQLite (optional)
+Set `DATABASE_URL` before running any `flask` or `python run.py` command:
 ```bash
-export SECRET_KEY="replace-this-secret"
-export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/campus_helpdesk"
+export DATABASE_URL="postgresql://user:password@localhost:5432/campus_helpdesk"
 ```
-
-### 6. Initialize the database and create the default admin
+Install the Postgres driver in the same venv:
 ```bash
-flask --app run.py init-db
+pip install psycopg2-binary
 ```
-
-### 7. Optional: seed demo data
-```bash
-flask --app run.py seed-demo
-```
-
-### 8. Start the application
-```bash
-python3 run.py
-```
+Then run `flask --app run.py init-db` as above.
 
 ## Demo Accounts
 ### Default admin
