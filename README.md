@@ -2,9 +2,6 @@
 
 Campus IT Help Desk is a multi-user web application for reporting and managing campus IT support issues. Regular users can create tickets, track ticket status, and post follow-up comments. Administrators can review all tickets, respond to users, and update ticket statuses through server-side role-based access control.
 
-## Demo Video
-Demo video link: https://drive.google.com/file/d/1fomxk1JQ6oF-cz2BovLRR2jx5AGZVxD3/view?usp=sharing
-
 ## Submission-Oriented Summary
 This project is intentionally scoped for a security analysis handoff. It is small enough to understand in one sitting, but complete enough to provide realistic attack surface in the areas of authentication, authorization, form input handling, route protection, and persistent data storage.
 
@@ -54,7 +51,13 @@ campus_it_help_desk/
 ├── .env.example
 ├── AI_USAGE.md
 ├── requirements.txt
-└── run.py
+├── run.py
+├── launch.command          # macOS double-click launcher (shell script)
+└── HelpDesk.app/           # macOS .app bundle wrapper with custom icon
+    └── Contents/
+        ├── Info.plist
+        ├── MacOS/HelpDesk
+        └── Resources/icon.icns
 ```
 
 ## Data Model
@@ -125,7 +128,7 @@ Stores replies between users and administrators on each ticket.
 2. The user logs in.
 3. The user opens the ticket submission page.
 4. The user submits a ticket with category, priority, and description.
-5. The application validates the input and writes the ticket to PostgreSQL.
+5. The application validates the input and writes the ticket to the database.
 6. The user is redirected to the ticket detail page and later sees the ticket on the dashboard.
 
 ### Workflow 2: Admin reviews and updates a ticket
@@ -133,7 +136,7 @@ Stores replies between users and administrators on each ticket.
 2. The admin opens the admin panel and reviews submitted tickets.
 3. The admin opens a ticket detail page.
 4. The admin updates the ticket status or posts a reply.
-5. The application writes the update to PostgreSQL.
+5. The application writes the update to the database.
 6. The user later logs in and sees the updated status and comment thread.
 
 ### Workflow 3: User reopens a resolved ticket
@@ -155,15 +158,43 @@ This project intentionally includes features that can be analyzed by another tea
 
 ## Setup Instructions
 
-### Quickest path (macOS)
-Double-click `HelpDesk.app` (or `launch.command`) in the project folder. It creates the virtualenv, installs dependencies, initializes the SQLite database, and opens the app in your browser.
+### Quickest path (macOS) — double-click launcher
+
+The repo ships with a one-click launcher so reviewers don't have to touch the terminal.
+
+1. Clone or download the repo into a folder (e.g. `~/Desktop/it_help_desk`).
+2. Double-click **`HelpDesk.app`** (preferred — has a custom icon) or **`launch.command`** in the project folder.
+3. A Terminal window opens and the launcher will:
+   - clear macOS quarantine on the project files,
+   - create a virtual environment under `venv/`,
+   - install dependencies from `requirements.txt`,
+   - run `flask --app run.py init-db` to create `helpdesk.db` and the default admin,
+   - start the Flask server and open `http://127.0.0.1:5000` in your browser.
+4. To stop the app, press `Ctrl+C` in the Terminal window.
+
+**First-time gotcha — Gatekeeper quarantine.** macOS may block the launcher because it was downloaded from the internet. If double-clicking does nothing, open Terminal once and run:
+
+```bash
+cd "$HOME/Desktop/it_help_desk" && chmod +x launch.command && xattr -cr launch.command 2>/dev/null; open launch.command
+```
+
+After that, double-click works for every subsequent run.
+
+**What's in the launcher bundle:**
+
+- `launch.command` — the shell script that does setup + run.
+- `HelpDesk.app/` — a tiny macOS `.app` bundle that wraps `launch.command` so it shows a custom icon in Finder. It just calls `open -a Terminal launch.command` under the hood.
+
+The launcher is idempotent: re-running it reuses `venv/`, re-installs any missing dependencies, and re-runs `init-db` (a no-op if the database already exists).
 
 ### Manual setup (any OS)
+
+If you're not on macOS, or you'd rather run things by hand:
 
 1. Create and activate a virtual environment:
    ```bash
    python3 -m venv venv
-   source venv/bin/activate
+   source venv/bin/activate            # Windows: venv\Scripts\activate
    ```
 2. Install dependencies:
    ```bash
@@ -173,7 +204,7 @@ Double-click `HelpDesk.app` (or `launch.command`) in the project folder. It crea
    ```bash
    flask --app run.py init-db
    ```
-4. Optional: seed demo data:
+4. Optional: seed demo data (creates Alice + sample tickets):
    ```bash
    flask --app run.py seed-demo
    ```
@@ -182,16 +213,25 @@ Double-click `HelpDesk.app` (or `launch.command`) in the project folder. It crea
    python3 run.py
    ```
 
+Then open `http://127.0.0.1:5000` in your browser.
+
 ### Using PostgreSQL instead of SQLite (optional)
-Set `DATABASE_URL` before running any `flask` or `python run.py` command:
+
+By default the app uses SQLite — `helpdesk.db` is created in the project root, no external database required.
+
+To use PostgreSQL instead, copy `.env.example` to `.env` and set `DATABASE_URL`:
+
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/campus_helpdesk"
+DATABASE_URL=postgresql://user:password@localhost:5432/campus_helpdesk
 ```
+
 Install the Postgres driver in the same venv:
+
 ```bash
 pip install psycopg2-binary
 ```
-Then run `flask --app run.py init-db` as above.
+
+Then run `flask --app run.py init-db` as above. The launcher reads `.env` automatically, so the double-click flow works for Postgres too.
 
 ## Demo Accounts
 ### Default admin
