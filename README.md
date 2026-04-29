@@ -5,6 +5,8 @@ Campus IT Help Desk is a multi-user web application for reporting and managing c
 ## Demo Video
 Demo video link: https://drive.google.com/file/d/1fomxk1JQ6oF-cz2BovLRR2jx5AGZVxD3/view?usp=sharing
 
+https://drive.google.com/file/d/1psLVI-Gf68KxvbzGfO2HD2zaDb9AzFen/view?usp=sharing
+
 ## Submission-Oriented Summary
 This project is intentionally scoped for a security analysis handoff. It is small enough to understand in one sitting, but complete enough to provide realistic attack surface in the areas of authentication, authorization, form input handling, route protection, and persistent data storage.
 
