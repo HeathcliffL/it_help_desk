@@ -3,7 +3,7 @@
 Campus IT Help Desk is a multi-user web application for reporting and managing campus IT support issues. Regular users can create tickets, track ticket status, and post follow-up comments. Administrators can review all tickets, respond to users, and update ticket statuses through server-side role-based access control.
 
 ## Demo Video
-Demo video link: https://drive.google.com/file/d/1fomxk1JQ6oF-cz2BovLRR2jx5AGZVxD3/view?usp=sharing
+Demo video link: https://youtu.be/qNHdS3QmbTc
 
 https://drive.google.com/file/d/1psLVI-Gf68KxvbzGfO2HD2zaDb9AzFen/view?usp=sharing
 
